@@ -1,0 +1,405 @@
+<!-- Main page structure for the MNIST digit recognition web app -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MNIST Digit Recognition</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <header class="app-header">
+
+        <div class="header-content">
+
+            <div class="brand">
+                <div class="brand-icon">7</div>
+
+                <div>
+                    <h1>MNIST Digit Recognition</h1>
+                    <p>Handwritten Digit Classification using CNN</p>
+                </div>
+            </div>
+
+            <div class="model-badge">
+                <span class="status-dot"></span>
+                CNN Model Ready
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <section class="intro">
+
+            <h2>Draw a Digit</h2>
+
+            <p>
+                Draw a handwritten digit from
+                <strong>0 to 9</strong>
+                and let the CNN model recognize it.
+            </p>
+
+        </section>
+
+
+        <section class="main-grid">
+
+            <!-- Drawing Card -->
+            <div class="card drawing-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Drawing Canvas</h3>
+
+                        <p>
+                            Draw clearly inside the box
+                        </p>
+                    </div>
+
+                    <span class="card-number">
+                        01
+                    </span>
+
+                </div>
+
+
+                <div class="canvas-wrapper">
+
+                    <canvas
+                        id="digitCanvas"
+                        width="280"
+                        height="280"
+                    ></canvas>
+
+                </div>
+
+
+                <div class="canvas-actions">
+
+                    <button
+                        id="clearButton"
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        <span>↻</span>
+                        Clear
+                    </button>
+
+                    <button
+                        id="predictButton"
+                        class="btn btn-primary"
+                        type="button"
+                    >
+                        <span>✦</span>
+                        Predict
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Prediction Card -->
+            <div class="card prediction-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Prediction</h3>
+
+                        <p>
+                            CNN model result
+                        </p>
+                    </div>
+
+                    <span class="card-number">
+                        02
+                    </span>
+
+                </div>
+
+
+                <!-- Actual Digit Input -->
+                <div class="actual-input-section">
+
+                    <label for="actualDigit">
+                        Actual Digit
+                        <span>(Optional)</span>
+                    </label>
+
+                    <p class="input-help">
+                        Enter the digit you intended to draw.
+                    </p>
+
+                    <input
+                        id="actualDigit"
+                        type="number"
+                        min="0"
+                        max="9"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="0–9"
+                    >
+
+                </div>
+
+
+                <div
+                    id="predictionContent"
+                    class="prediction-content"
+                >
+
+                    <div
+                        id="predictionValue"
+                        class="prediction-value"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        id="predictionMessage"
+                        class="prediction-message"
+                    >
+                        Draw a digit and click Predict
+                    </div>
+
+                    <div class="confidence-section">
+
+                        <div class="confidence-header">
+
+                            <span>
+                                Confidence
+                            </span>
+
+                            <strong id="confidenceText">
+                                0%
+                            </strong>
+
+                        </div>
+
+                        <div class="confidence-track">
+
+                            <div
+                                id="confidenceBar"
+                                class="confidence-bar"
+                                style="width: 0%"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Loading -->
+                <div
+                    id="loadingState"
+                    class="loading-state hidden"
+                >
+
+                    <div class="spinner"></div>
+
+                    <span>
+                        Analyzing your digit...
+                    </span>
+
+                </div>
+
+
+                <!-- What CNN Sees -->
+                <div class="processed-section">
+
+                    <div class="processed-header">
+
+                        <div>
+                            <h4>What CNN Sees</h4>
+
+                            <p>
+                                Processed 28 × 28 image
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="processed-preview">
+
+                        <div
+                            id="processedPlaceholder"
+                            class="processed-placeholder"
+                        >
+                            28×28
+                        </div>
+
+                        <img
+                            id="processedImage"
+                            class="hidden"
+                            alt="Processed digit"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Prediction History -->
+        <section class="card history-card">
+
+            <div class="history-header">
+
+                <div>
+
+                    <h3>Prediction History</h3>
+
+                    <p>
+                        Your recent predictions are saved locally.
+                    </p>
+
+                </div>
+
+                <button
+                    id="clearHistoryButton"
+                    class="clear-history-btn"
+                    type="button"
+                >
+                    Clear History
+                </button>
+
+            </div>
+
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Total Predictions
+                    </span>
+
+                    <strong id="totalPredictions">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Average Confidence
+                    </span>
+
+                    <strong id="averageConfidence">
+                        0%
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Evaluated
+                    </span>
+
+                    <strong id="evaluatedPredictions">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span class="stat-label">
+                        Correct
+                    </span>
+
+                    <strong id="correctPredictions">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- History Table -->
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>Actual</th>
+                            <th>Predicted</th>
+                            <th>Confidence</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="historyBody">
+
+                        <tr class="empty-history">
+
+                            <td colspan="6">
+                                No predictions yet.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer class="app-footer">
+
+        <p>
+            MNIST Handwritten Digit Recognition
+            <span>•</span>
+            CNN powered
+        </p>
+
+    </footer>
+
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+</body>
+
+</html>

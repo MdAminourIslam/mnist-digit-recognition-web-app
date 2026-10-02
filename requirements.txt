@@ -1,0 +1,6 @@
+tensorflow==2.21.0
+flask
+opencv-python
+numpy
+matplotlib
+scikit-learn
